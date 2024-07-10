@@ -17,8 +17,8 @@ import androidx.core.app.NotificationManagerCompat
 import notivate.com.R
 
 class MainActivity : AppCompatActivity() {
-    private val CHANNEL_ID = "notification_channel"
-    private val NOTIFICATION_ID = 1
+    private val CHANNELID = "notification_channel"
+    private val NOTIFICATIONID = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,7 +37,7 @@ class MainActivity : AppCompatActivity() {
         val name = "Notification Channel"
         val descriptionText = "Channel for sending notifications"
         val importance = NotificationManager.IMPORTANCE_DEFAULT
-        val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
+        val channel = NotificationChannel(CHANNELID, name, importance).apply {
             description = descriptionText
         }
 
@@ -52,7 +52,7 @@ class MainActivity : AppCompatActivity() {
         }
         val pendingIntent: PendingIntent = PendingIntent.getActivity(this, 0, intent, 0)
 
-        val builder = NotificationCompat.Builder(this, CHANNEL_ID)
+        val builder = NotificationCompat.Builder(this, CHANNELID)
             .setSmallIcon(R.drawable.ic_notification) // Set your icon here
             .setContentTitle("My Notification")
             .setContentText("Testing Notification")
@@ -68,7 +68,7 @@ class MainActivity : AppCompatActivity() {
             ) {
                 return
             }
-            notify(NOTIFICATION_ID, builder.build())
+            notify(NOTIFICATIONID, builder.build())
         }
     }
 }
