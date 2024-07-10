@@ -81,12 +81,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun sendNotification() {
-        val intent = Intent(this, MainActivity::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-
+        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         val builder = NotificationCompat.Builder(this, CHANNELID)
-            .setSmallIcon(R.drawable.ic_notification) // Set your icon here
+            .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle("My Notification")
             .setContentText("Testing Notification")
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
