@@ -15,7 +15,7 @@ class NotificationService : Service() {
     companion object {
         private const val CHANNEL_ID = "notification_channel"
         private const val NOTIFICATION_ID = 1
-        private const val NOTIFICATION_INTERVAL_MS = 20000 // 20 seconds
+        private const val NOTIFICATION_INTERVAL_MS = 20000L // 20 seconds
     }
 
     private val handler = Handler(Looper.getMainLooper())
