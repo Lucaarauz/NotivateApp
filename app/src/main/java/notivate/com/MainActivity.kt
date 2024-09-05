@@ -13,12 +13,12 @@ import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 
-private val notificationDelay: int = 10000
 
 class MainActivity : AppCompatActivity() {
     private val CHANNELID = "notification_channel"
     private val NOTIFICATIONID = 1
     private val PERMISSION_REQUEST_CODE = 100
+    private val notificationDelay = 10000
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,7 +82,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun scheduleNotificationWithAlarm(delay: Long) {
+    private fun scheduleNotificationWithAlarm(delay: Int) {
         val intent = Intent(this, NotificationReceiver::class.java).apply {
             putExtra("channelId", CHANNELID)
             putExtra("notificationId", NOTIFICATIONID)
