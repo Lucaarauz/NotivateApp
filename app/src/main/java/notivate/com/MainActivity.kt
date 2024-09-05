@@ -1,15 +1,16 @@
 package notivate.com
 
 import android.Manifest
+import android.app.AlarmManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -72,8 +73,8 @@ class MainActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == PERMISSION_REQUEST_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permission granted, proceed with sending notification
-                sendNotification()
+                // Permission granted, schedule the notification for 10 seconds later
+                scheduleNotificationWithAlarm(10000) // 10 seconds
             } else {
                 // Permission denied, handle this case (e.g., show a message, disable functionality)
             }
@@ -81,7 +82,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun sendNotification() {
-        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        val intent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
         val builder = NotificationCompat.Builder(this, CHANNELID)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle("Notivate")
@@ -100,5 +107,21 @@ class MainActivity : AppCompatActivity() {
             }
             notify(NOTIFICATIONID, builder.build())
         }
+    }
+
+    private fun scheduleNotificationWithAlarm(delay: Long) {
+        val intent = Intent(this, NotificationReceiver::class.java).apply {
+            putExtra("channelId", CHANNELID)
+            putExtra("notificationId", NOTIFICATIONID)
+        }
+        val pendingIntent = PendingIntent.getBroadcast(
+            this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        alarmManager.setExact(
+            AlarmManager.RTC_WAKEUP,
+            System.currentTimeMillis() + delay,
+            pendingIntent
+        )
     }
 }
