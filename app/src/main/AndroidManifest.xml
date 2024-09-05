@@ -23,11 +23,8 @@
             </intent-filter>
         </activity>
 
-        <!-- Register NotificationService -->
-        <service android:name=".NotificationService" />
-
-        <!-- Register NotificationReceiver -->
-        <receiver android:name=".NotificationReceiver" />
+        <!-- Register NotificationActionService -->
+        <service android:name=".NotificationActionService" />
 
     </application>
 
