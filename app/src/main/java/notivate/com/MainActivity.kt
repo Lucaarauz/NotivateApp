@@ -49,7 +49,7 @@ class MainActivity : AppCompatActivity() {
     private fun checkAndSendNotification() {
         if (isNotificationPermissionGranted()) {
             // Schedule notification for 10 seconds later
-            scheduleNotificationWithAlarm(10000) // 10 seconds = 10000 milliseconds
+            scheduleNotificationWithAlarm(notificationDelay) // 10 seconds = 10000 milliseconds
         } else {
             requestNotificationPermission()
         }
@@ -75,7 +75,7 @@ class MainActivity : AppCompatActivity() {
         if (requestCode == PERMISSION_REQUEST_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Permission granted, schedule the notification for 10 seconds later
-                scheduleNotificationWithAlarm(notificationDelay)
+                scheduleNotificationWithAlarm()
             } else {
                 // Permission denied, handle this case (e.g., show a message, disable functionality)
             }
