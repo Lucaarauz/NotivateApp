@@ -75,14 +75,14 @@ class MainActivity : AppCompatActivity() {
         if (requestCode == PERMISSION_REQUEST_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Permission granted, schedule the notification for 10 seconds later
-                scheduleNotificationWithAlarm(notificationDelay);
+                scheduleNotificationWithAlarm(notificationDelay)
             } else {
                 // Permission denied, handle this case (e.g., show a message, disable functionality)
             }
         }
     }
 
-    private fun scheduleNotificationWithAlarm(delay: Int) {
+    private fun scheduleNotificationWithAlarm() {
         val intent = Intent(this, NotificationReceiver::class.java).apply {
             putExtra("channelId", CHANNELID)
             putExtra("notificationId", NOTIFICATIONID)
@@ -93,7 +93,7 @@ class MainActivity : AppCompatActivity() {
         val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
         alarmManager.setExact(
             AlarmManager.RTC_WAKEUP,
-            System.currentTimeMillis() + delay,
+            System.currentTimeMillis() + notificationDelay,
             pendingIntent
         )
     }
