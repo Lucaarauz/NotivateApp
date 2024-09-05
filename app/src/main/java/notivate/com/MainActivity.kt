@@ -12,10 +12,8 @@ import android.os.Bundle
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 
-private val notificationDelay: long = 10000
+private val notificationDelay: int = 10000
 
 class MainActivity : AppCompatActivity() {
     private val CHANNELID = "notification_channel"
