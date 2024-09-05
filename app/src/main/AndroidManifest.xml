@@ -23,7 +23,7 @@
         </activity>
 
         <!-- Register NotificationService -->
-        <service android:name=".NotificationActionService" />
+        <service android:name=".NotificationService" />
 
         <!-- Register NotificationReceiver -->
         <receiver android:name=".NotificationReceiver" />
