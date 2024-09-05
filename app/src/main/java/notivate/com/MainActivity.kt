@@ -49,7 +49,7 @@ class MainActivity : AppCompatActivity() {
     private fun checkAndSendNotification() {
         if (isNotificationPermissionGranted()) {
             // Schedule notification for 10 seconds later
-            scheduleNotificationWithAlarm(notificationDelay) // 10 seconds = 10000 milliseconds
+            scheduleNotificationWithAlarm() // 10 seconds = 10000 milliseconds
         } else {
             requestNotificationPermission()
         }
