@@ -8,17 +8,19 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-
 
 class MainActivity : AppCompatActivity() {
     private val CHANNELID = "notification_channel"
     private val NOTIFICATIONID = 1
     private val PERMISSION_REQUEST_CODE = 100
-    private val notificationDelay = 10000
+    private val EXACT_ALARM_REQUEST_CODE = 200
+    private val notificationDelay = 10000 // 10 seconds
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,8 +50,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun checkAndSendNotification() {
         if (isNotificationPermissionGranted()) {
-            // Schedule notification for 10 seconds later
-            scheduleNotificationWithAlarm() // 10 seconds = 10000 milliseconds
+            if (canScheduleExactAlarms()) {
+                scheduleNotificationWithAlarm()
+            } else {
+                requestExactAlarmPermission()
+            }
         } else {
             requestNotificationPermission()
         }
@@ -70,12 +75,29 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
+    // Check if the app can schedule exact alarms (for Android 12+)
+    private fun canScheduleExactAlarms(): Boolean {
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        return Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarmManager.canScheduleExactAlarms()
+    }
+
+    private fun requestExactAlarmPermission() {
+        // Direct the user to the exact alarm permission settings (Android 12+)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
+            startActivityForResult(intent, EXACT_ALARM_REQUEST_CODE)
+        }
+    }
+
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == PERMISSION_REQUEST_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permission granted, schedule the notification for 10 seconds later
-                scheduleNotificationWithAlarm()
+                if (canScheduleExactAlarms()) {
+                    scheduleNotificationWithAlarm()
+                } else {
+                    requestExactAlarmPermission()
+                }
             } else {
                 // Permission denied, handle this case (e.g., show a message, disable functionality)
             }
@@ -83,18 +105,23 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun scheduleNotificationWithAlarm() {
-        val intent = Intent(this, NotificationReceiver::class.java).apply {
-            putExtra("channelId", CHANNELID)
-            putExtra("notificationId", NOTIFICATIONID)
+        try {
+            val intent = Intent(this, NotificationReceiver::class.java).apply {
+                putExtra("channelId", CHANNELID)
+                putExtra("notificationId", NOTIFICATIONID)
+            }
+            val pendingIntent = PendingIntent.getBroadcast(
+                this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            alarmManager.setExact(
+                AlarmManager.RTC_WAKEUP,
+                System.currentTimeMillis() + notificationDelay,
+                pendingIntent
+            )
+        } catch (e: SecurityException) {
+            // Handle exception if the permission is not granted
+            requestExactAlarmPermission()
         }
-        val pendingIntent = PendingIntent.getBroadcast(
-            this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        alarmManager.setExact(
-            AlarmManager.RTC_WAKEUP,
-            System.currentTimeMillis() + notificationDelay,
-            pendingIntent
-        )
     }
 }
