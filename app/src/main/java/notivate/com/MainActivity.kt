@@ -15,6 +15,8 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 
+private val notificationDelay: long = 10000
+
 class MainActivity : AppCompatActivity() {
     private val CHANNELID = "notification_channel"
     private val NOTIFICATIONID = 1
@@ -48,7 +50,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun checkAndSendNotification() {
         if (isNotificationPermissionGranted()) {
-            sendNotification()
+            // Schedule notification for 10 seconds later
+            scheduleNotificationWithAlarm(10000) // 10 seconds = 10000 milliseconds
         } else {
             requestNotificationPermission()
         }
@@ -74,38 +77,10 @@ class MainActivity : AppCompatActivity() {
         if (requestCode == PERMISSION_REQUEST_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Permission granted, schedule the notification for 10 seconds later
-                scheduleNotificationWithAlarm(10000) // 10 seconds
+                scheduleNotificationWithAlarm(notificationDelay);
             } else {
                 // Permission denied, handle this case (e.g., show a message, disable functionality)
             }
-        }
-    }
-
-    private fun sendNotification() {
-        val intent = Intent(this, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        }
-        val pendingIntent = PendingIntent.getActivity(
-            this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        val builder = NotificationCompat.Builder(this, CHANNELID)
-            .setSmallIcon(R.drawable.ic_notification)
-            .setContentTitle("Notivate")
-            .setContentText("Make sure to touch some grass!")
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .setContentIntent(pendingIntent)
-            .setAutoCancel(true)
-
-        with(NotificationManagerCompat.from(this@MainActivity)) {
-            if (ActivityCompat.checkSelfPermission(
-                    this@MainActivity,
-                    Manifest.permission.POST_NOTIFICATIONS
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                return
-            }
-            notify(NOTIFICATIONID, builder.build())
         }
     }
 
