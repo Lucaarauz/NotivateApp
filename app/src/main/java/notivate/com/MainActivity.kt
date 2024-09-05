@@ -16,7 +16,6 @@ import androidx.core.app.ActivityCompat
 
 class MainActivity : AppCompatActivity() {
     private val CHANNELID = "notification_channel"
-    private val NOTIFICATIONID = 1
     private val PERMISSION_REQUEST_CODE = 100
     private val EXACT_ALARM_REQUEST_CODE = 200
     private val notificationDelay = 10000 // in milliseconds
@@ -30,7 +29,7 @@ class MainActivity : AppCompatActivity() {
 
         val notifyButton: Button = findViewById(R.id.notifyButton)
         notifyButton.setOnClickListener {
-            checkAndSendNotification()
+            checkAndStartService()
         }
     }
 
@@ -47,10 +46,10 @@ class MainActivity : AppCompatActivity() {
         notificationManager.createNotificationChannel(channel)
     }
 
-    private fun checkAndSendNotification() {
+    private fun checkAndStartService() {
         if (isNotificationPermissionGranted()) {
             if (canScheduleExactAlarms()) {
-                scheduleNotificationWithAlarm()
+                startNotificationService()
             } else {
                 requestExactAlarmPermission()
             }
@@ -84,12 +83,17 @@ class MainActivity : AppCompatActivity() {
         startActivityForResult(intent, EXACT_ALARM_REQUEST_CODE)
     }
 
+    private fun startNotificationService() {
+        val serviceIntent = Intent(this, NotificationService::class.java)
+        ContextCompat.startForegroundService(this, serviceIntent)
+    }
+
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == PERMISSION_REQUEST_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 if (canScheduleExactAlarms()) {
-                    scheduleNotificationWithAlarm()
+                    startNotificationService()
                 } else {
                     requestExactAlarmPermission()
                 }
@@ -97,21 +101,5 @@ class MainActivity : AppCompatActivity() {
                 // Permission denied, handle this case (e.g., show a message, disable functionality)
             }
         }
-    }
-
-    private fun scheduleNotificationWithAlarm() {
-        val intent = Intent(this, NotificationService::class.java).apply {
-            putExtra("channelId", CHANNELID)
-            putExtra("notificationId", NOTIFICATIONID)
-        }
-        val pendingIntent = PendingIntent.getService(
-            this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        alarmManager.setExact(
-            AlarmManager.RTC_WAKEUP,
-            System.currentTimeMillis() + notificationDelay,
-            pendingIntent
-        )
     }
 }
