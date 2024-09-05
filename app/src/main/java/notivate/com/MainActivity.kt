@@ -18,7 +18,6 @@ import androidx.core.content.ContextCompat
 
 class MainActivity : AppCompatActivity() {
     private val CHANNELID = "notification_channel"
-    private val PERMISSION_REQUEST_CODE = 100
 
     private lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
     private lateinit var requestExactAlarmLauncher: ActivityResultLauncher<Intent>
