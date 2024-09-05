@@ -8,7 +8,6 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.widget.Button
@@ -20,7 +19,7 @@ class MainActivity : AppCompatActivity() {
     private val NOTIFICATIONID = 1
     private val PERMISSION_REQUEST_CODE = 100
     private val EXACT_ALARM_REQUEST_CODE = 200
-    private val notificationDelay = 10000 // 10 seconds
+    private val notificationDelay = 10000 // in milliseconds
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,15 +77,13 @@ class MainActivity : AppCompatActivity() {
     // Check if the app can schedule exact alarms (for Android 12+)
     private fun canScheduleExactAlarms(): Boolean {
         val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        return Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarmManager.canScheduleExactAlarms()
+        return alarmManager.canScheduleExactAlarms()
     }
 
     private fun requestExactAlarmPermission() {
         // Direct the user to the exact alarm permission settings (Android 12+)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
-            startActivityForResult(intent, EXACT_ALARM_REQUEST_CODE)
-        }
+        val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
+        startActivityForResult(intent, EXACT_ALARM_REQUEST_CODE)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
