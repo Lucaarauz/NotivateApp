@@ -102,7 +102,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun scheduleNotificationWithAlarm() {
-        val intent = Intent(this, NotificationActionService::class.java).apply {
+        val intent = Intent(this, NotificationService::class.java).apply {
             putExtra("channelId", CHANNELID)
             putExtra("notificationId", NOTIFICATIONID)
         }
