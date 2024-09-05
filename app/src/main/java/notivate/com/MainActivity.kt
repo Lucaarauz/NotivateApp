@@ -13,6 +13,8 @@ import android.provider.Settings
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 
 class MainActivity : AppCompatActivity() {
     private val CHANNELID = "notification_channel"
@@ -74,14 +76,12 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    // Check if the app can schedule exact alarms (for Android 12+)
     private fun canScheduleExactAlarms(): Boolean {
         val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
         return alarmManager.canScheduleExactAlarms()
     }
 
     private fun requestExactAlarmPermission() {
-        // Direct the user to the exact alarm permission settings (Android 12+)
         val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
         startActivityForResult(intent, EXACT_ALARM_REQUEST_CODE)
     }
@@ -102,23 +102,18 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun scheduleNotificationWithAlarm() {
-        try {
-            val intent = Intent(this, NotificationReceiver::class.java).apply {
-                putExtra("channelId", CHANNELID)
-                putExtra("notificationId", NOTIFICATIONID)
-            }
-            val pendingIntent = PendingIntent.getBroadcast(
-                this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-            val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            alarmManager.setExact(
-                AlarmManager.RTC_WAKEUP,
-                System.currentTimeMillis() + notificationDelay,
-                pendingIntent
-            )
-        } catch (e: SecurityException) {
-            // Handle exception if the permission is not granted
-            requestExactAlarmPermission()
+        val intent = Intent(this, NotificationActionService::class.java).apply {
+            putExtra("channelId", CHANNELID)
+            putExtra("notificationId", NOTIFICATIONID)
         }
+        val pendingIntent = PendingIntent.getService(
+            this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        alarmManager.setExact(
+            AlarmManager.RTC_WAKEUP,
+            System.currentTimeMillis() + notificationDelay,
+            pendingIntent
+        )
     }
 }
