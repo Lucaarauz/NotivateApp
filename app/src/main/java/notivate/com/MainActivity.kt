@@ -13,8 +13,6 @@ import android.provider.Settings
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 
 class MainActivity : AppCompatActivity() {
     private val CHANNELID = "notification_channel"
