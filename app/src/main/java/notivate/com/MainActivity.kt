@@ -8,8 +8,6 @@ import android.os.Bundle
 import android.os.SystemClock
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.NotificationCompat
-import androidx.core.content.ContextCompat
 
 class MainActivity : AppCompatActivity() {
 
