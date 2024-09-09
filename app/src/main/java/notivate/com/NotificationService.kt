@@ -1,11 +1,14 @@
 package notivate.com
 
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
+import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 
 class NotificationService : Service() {
 
@@ -14,29 +17,57 @@ class NotificationService : Service() {
         private const val NOTIFICATION_ID = 1
     }
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        sendNotification()
-        stopSelf() // Stop the service after showing the notification
-        return START_NOT_STICKY
+    override fun onCreate() {
+        super.onCreate()
+        // Create notification channel for Android versions O and above
+        createNotificationChannel()
     }
 
-    private fun sendNotification() {
-        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Reminder")
-            .setContentText("You've been using your phone for 1 hour. Time to take a break!")
-            .setSmallIcon(R.drawable.ic_notification)
-            .setAutoCancel(true)
-            .build()
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        // Build and show the notification
+        val notification = buildNotification(
+            title = "Take a Break!",
+            text = "You have been on your phone for 1 hour. It's time to take a break!"
+        )
 
-        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.notify(NOTIFICATION_ID, notification)
+        // Display the notification
+        startForeground(NOTIFICATION_ID, notification)
+
+        // Since this is a foreground service, we stop the service after posting the notification
+        stopForeground(true)
+        stopSelf()
+
+        return START_NOT_STICKY
     }
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
     }
 
+    // Create notification channel for Android O+ devices
     private fun createNotificationChannel() {
-        // Your existing notification channel creation code
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val name = "Screen Time Reminder"
+            val descriptionText = "Channel for sending screen time notifications"
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
+                description = descriptionText
+            }
+
+            val notificationManager: NotificationManager =
+                getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+    }
+
+    // Build the notification to be displayed
+    private fun buildNotification(title: String, text: String): Notification {
+        return NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle(title)
+            .setContentText(text)
+            .setSmallIcon(R.drawable.ic_notification) // Use your own notification icon here
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setAutoCancel(true) // Dismiss the notification when tapped
+            .build()
     }
 }
