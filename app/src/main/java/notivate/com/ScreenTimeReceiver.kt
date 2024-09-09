@@ -10,7 +10,7 @@ import android.os.SystemClock
 class ScreenTimeReceiver : BroadcastReceiver() {
     private var screenOnTime: Long = 0L // Total screen-on time in milliseconds
     private var screenOnStart: Long = 0L // Time when the screen was turned on
-    private val oneHourMillis: Long = 60 * 60 * 1000 // 1 hour in milliseconds
+    private val oneHourMillis: Long = 3600 * 1000 // 1 hour in milliseconds
 
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == Intent.ACTION_SCREEN_ON) {
