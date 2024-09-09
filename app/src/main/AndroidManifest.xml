@@ -2,8 +2,14 @@
     package="notivate.com">
 
     <!-- Permissions -->
+    <!-- Permission for sending notifications -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Permission for tracking exact alarm/screen time -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <!-- Permission for tracking screen on/off events -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!-- Permission to receive BOOT_COMPLETED (if you want the service to run after a reboot) -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:icon="@mipmap/ic_launcher"
@@ -12,7 +18,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Notivate">
 
-        <!-- MainActivity -->
+        <!-- Main Activity -->
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -22,11 +28,30 @@
             </intent-filter>
         </activity>
 
-        <!-- Register NotificationService -->
-        <service android:name=".NotificationService" />
+        <!-- Notification Service (handles showing the notification) -->
+        <service
+            android:name=".NotificationService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback" />
 
-        <!-- Register NotificationReceiver -->
-        <receiver android:name=".NotificationReceiver" />
+        <!-- Broadcast Receiver for handling notifications and screen time -->
+        <receiver android:name=".NotificationReceiver"
+            android:enabled="true"
+            android:exported="false" />
+
+        <!-- Optional: BroadcastReceiver for boot completed to resume tracking after reboot -->
+        <receiver android:name=".ScreenTimeReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <!-- Screen on and off actions -->
+                <action android:name="android.intent.action.SCREEN_ON" />
+                <action android:name="android.intent.action.SCREEN_OFF" />
+                <!-- Optional: Boot completed action to resume tracking after reboot -->
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
 
     </application>
 
