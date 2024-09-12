@@ -7,6 +7,7 @@ import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
+import android.app.PendingIntent
 
 class NotificationService : Service() {
 
@@ -50,12 +51,19 @@ class NotificationService : Service() {
     }
 
     private fun buildNotification(title: String, text: String): Notification {
+        // Create an Intent to launch an Activity when the notification is clicked
+        val clickIntent = Intent(this, NotificationClickActivity::class.java)
+        val pendingIntent = PendingIntent.getActivity(
+            this, 0, clickIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(title)
             .setContentText(text)
             .setSmallIcon(R.drawable.ic_notification)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setAutoCancel(true)
+            .setContentIntent(pendingIntent) // Attach the PendingIntent to the notification
             .build()
     }
 }
