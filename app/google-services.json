@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "639111532836",
+    "project_id": "notivateapp-8fa87",
+    "storage_bucket": "notivateapp-8fa87.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:639111532836:android:35b05c984646fcd62fa3b1",
+        "android_client_info": {
+          "package_name": "notivate.com"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDbL1XeuVop8txbwgprjaimJxebgTgR5qM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

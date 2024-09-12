@@ -23,6 +23,13 @@
             </intent-filter>
         </activity>
 
+        <!-- NotificationClickActivity: Launched when the user clicks on the notification -->
+        <activity
+            android:name=".NotificationClickActivity"
+            android:exported="true">
+            <!-- You may not need an intent-filter here unless you want it to be launched in other scenarios -->
+        </activity>
+
         <!-- Notification Service -->
         <service
             android:name=".NotificationService"
@@ -31,7 +38,8 @@
             android:foregroundServiceType="mediaPlayback" />
 
         <!-- Broadcast Receiver for screen time tracking -->
-        <receiver android:name=".ScreenTimeReceiver"
+        <receiver
+            android:name=".ScreenTimeReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
@@ -42,5 +50,4 @@
         </receiver>
 
     </application>
-
 </manifest>
