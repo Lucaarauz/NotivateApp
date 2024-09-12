@@ -12,7 +12,7 @@ class NotificationClickActivity : AppCompatActivity() {
         // Log the click data to Firebase
         sendClickDataToFirebase()
 
-        // Close the activity once the data is sent (if it's just logging the click)
+        // Close the activity once the data is sent
         finish()
     }
 
@@ -20,7 +20,7 @@ class NotificationClickActivity : AppCompatActivity() {
         val database = FirebaseDatabase.getInstance().getReference("clicks")
         val clickData = mapOf(
             "timestamp" to System.currentTimeMillis(),
-            "notificationId" to "unique_notification_id"  // Add more data if needed
+            "notificationId" to "unique_notification_id"  // Ideally, use an actual notification ID
         )
 
         database.push().setValue(clickData)
