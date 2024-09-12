@@ -1,3 +1,4 @@
+// Project-level build.gradle.kts
 plugins {
     // Plugin versions are defined in the 'libs' block if you're using version catalog
     alias(libs.plugins.android.application) apply false
@@ -5,19 +6,9 @@ plugins {
 }
 
 buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
+    // Dependencies for the build script
     dependencies {
         // Add the Google services classpath
         classpath("com.google.gms:google-services:4.4.2")
-    }
-}
-
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
     }
 }
