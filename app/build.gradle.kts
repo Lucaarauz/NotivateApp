@@ -1,7 +1,8 @@
+// build.gradle.kts (app-level)
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("com.google.gms.google-services") // Apply the Google services plugin
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -45,9 +46,4 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-
-    // Firebase dependencies
-    implementation(platform("com.google.firebase:firebase-bom:32.3.1")) // Firebase BoM
-    implementation("com.google.firebase:firebase-analytics")
-    implementation("com.google.firebase:firebase-database") // For Firebase Realtime Database
 }
