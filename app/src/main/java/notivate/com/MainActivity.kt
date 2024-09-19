@@ -1,7 +1,7 @@
 package notivate.com
 
+import android.Manifest
 import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
@@ -11,10 +11,9 @@ import android.provider.Settings
 import android.widget.Button
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.database.FirebaseDatabase
 
 class MainActivity : AppCompatActivity() {
 
@@ -41,9 +40,9 @@ class MainActivity : AppCompatActivity() {
         // Button for manual notification
         val notifyButton: Button = findViewById(R.id.notifyButton)
         notifyButton.setOnClickListener {
-            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS)
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
                 == PackageManager.PERMISSION_GRANTED) {
-                sendNotification()
+                triggerNotificationService()
             } else {
                 showPermissionDeniedMessage()
             }
@@ -52,10 +51,10 @@ class MainActivity : AppCompatActivity() {
 
     // Request notification permission for Android 13 (API 33+) and above
     private fun requestNotificationPermission() {
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS)
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
             != PackageManager.PERMISSION_GRANTED
         ) {
-            notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
     }
 
@@ -88,30 +87,42 @@ class MainActivity : AppCompatActivity() {
         registerReceiver(screenTimeReceiver, filter)
     }
 
-    // Send a notification
-    private fun sendNotification() {
-        val title = "Test Notification"
-        val text = "This notification was sent from MainActivity!"
+    // Start the NotificationService to send a notification
+    private fun triggerNotificationService() {
+        val notificationIntent = Intent(this, NotificationService::class.java)
+        // Pass notification data if needed
+        notificationIntent.putExtra("notification_title", "Test Notification")
+        notificationIntent.putExtra("notification_text", "This notification was sent from MainActivity!")
+        startService(notificationIntent)
 
-        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle(title)
-            .setContentText(text)
-            .setSmallIcon(R.drawable.ic_notification) // Use your own notification icon here
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .setAutoCancel(true)
-            .build()
+        // Log notification data to Firebase
+        logNotificationToFirebase(
+            title = "Test Notification",
+            text = "This notification was sent from MainActivity!"
+        )
+    }
 
-        NotificationManagerCompat.from(this).notify(NOTIFICATION_ID, notification)
+    // Log notification data to Firebase
+    private fun logNotificationToFirebase(title: String, text: String) {
+        val database = FirebaseDatabase.getInstance().getReference("notifications")
+        val notificationData = mapOf(
+            "timestamp" to System.currentTimeMillis(),
+            "title" to title,
+            "text" to text
+        )
+
+        database.push().setValue(notificationData)
+            .addOnSuccessListener {
+                Log.d("Firebase", "Notification data logged successfully")
+            }
+            .addOnFailureListener { e ->
+                Log.e("Firebase", "Failed to log notification data: ${e.message}")
+            }
     }
 
     // Unregister the BroadcastReceiver when the activity is destroyed
     override fun onDestroy() {
         super.onDestroy()
         unregisterReceiver(screenTimeReceiver)
-    }
-
-    companion object {
-        private const val CHANNEL_ID = "notification_channel"
-        private const val NOTIFICATION_ID = 1
     }
 }

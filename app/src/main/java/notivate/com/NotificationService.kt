@@ -9,6 +9,8 @@ import android.content.Intent
 import android.os.Handler
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
+import com.google.firebase.database.FirebaseDatabase
+import android.util.Log
 
 class NotificationService : Service() {
 
@@ -77,6 +79,9 @@ class NotificationService : Service() {
 
         // Display the notification
         startForeground(NOTIFICATION_ID, notification)
+
+        // Log notification data to Firebase
+        logNotificationToFirebase(title, text)
     }
 
     private fun buildNotification(title: String, text: String): Notification {
@@ -93,5 +98,23 @@ class NotificationService : Service() {
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .build()
+    }
+
+    // Log notification data to Firebase
+    private fun logNotificationToFirebase(title: String, text: String) {
+        val database = FirebaseDatabase.getInstance().getReference("notifications")
+        val notificationData = mapOf(
+            "timestamp" to System.currentTimeMillis(),
+            "title" to title,
+            "text" to text
+        )
+
+        database.push().setValue(notificationData)
+            .addOnSuccessListener {
+                Log.d("Firebase", "Notification data logged successfully")
+            }
+            .addOnFailureListener { e ->
+                Log.e("Firebase", "Failed to log notification data: ${e.message}")
+            }
     }
 }

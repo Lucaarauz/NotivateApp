@@ -9,6 +9,13 @@ buildscript {
     // Dependencies for the build script
     dependencies {
         // Add the Google services classpath
-        classpath("com.google.gms:google-services:4.4.2")
+        classpath(libs.google.services)
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
     }
 }
