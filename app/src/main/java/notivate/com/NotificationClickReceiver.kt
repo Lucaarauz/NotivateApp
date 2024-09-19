@@ -27,7 +27,7 @@ class NotificationClickActivity : AppCompatActivity() {
             .addOnSuccessListener {
                 Log.d("Firebase", "Click data sent successfully")
             }
-            .addOnFailureListener { e ->
+            .addOnFailureListener { e: Exception ->
                 Log.e("Firebase", "Failed to send data: ${e.message}")
             }
     }

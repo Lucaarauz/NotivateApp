@@ -22,11 +22,12 @@ class NotificationService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        // Extract title and text from intent extras
+        val title = intent?.getStringExtra("notification_title") ?: "Take a Break!"
+        val text = intent?.getStringExtra("notification_message") ?: "You have been on your phone for 1 hour. It's time to take a break!"
+
         // Build and show the notification
-        val notification = buildNotification(
-            title = "Take a Break!",
-            text = "You have been on your phone for 1 hour. It's time to take a break!"
-        )
+        val notification = buildNotification(title, text)
 
         // Display the notification
         startForeground(NOTIFICATION_ID, notification)
