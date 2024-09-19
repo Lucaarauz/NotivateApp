@@ -1,12 +1,6 @@
 pluginManagement {
     repositories {
-        google {
-            content {
-                includeGroupByRegex("com\\.android.*")
-                includeGroupByRegex("com\\.google.*")
-                includeGroupByRegex("androidx.*")
-            }
-        }
+        google() // Use the standard google() repository here
         mavenCentral()
         gradlePluginPortal()
     }
@@ -21,4 +15,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "Notivate"
 include(":app")
- 
