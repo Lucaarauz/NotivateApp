@@ -1,6 +1,7 @@
 package notivate.com
 
 import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
@@ -10,6 +11,8 @@ import android.provider.Settings
 import android.widget.Button
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
 
@@ -21,7 +24,6 @@ class MainActivity : AppCompatActivity() {
     private val notificationPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
             if (!isGranted) {
-                // Handle the case when notification permission is not granted
                 showPermissionDeniedMessage()
             }
         }
@@ -36,10 +38,15 @@ class MainActivity : AppCompatActivity() {
         // Initialize and register the BroadcastReceiver
         registerScreenTimeReceiver()
 
-        // Button for manual notification (optional for testing)
+        // Button for manual notification
         val notifyButton: Button = findViewById(R.id.notifyButton)
         notifyButton.setOnClickListener {
-            triggerNotification()
+            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS)
+                == PackageManager.PERMISSION_GRANTED) {
+                sendNotification()
+            } else {
+                showPermissionDeniedMessage()
+            }
         }
     }
 
@@ -48,7 +55,6 @@ class MainActivity : AppCompatActivity() {
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS)
             != PackageManager.PERMISSION_GRANTED
         ) {
-            // Request notification permission
             notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
         }
     }
@@ -82,15 +88,30 @@ class MainActivity : AppCompatActivity() {
         registerReceiver(screenTimeReceiver, filter)
     }
 
-    // Trigger a manual notification (useful for testing)
-    private fun triggerNotification() {
-        val notificationIntent = Intent(this, NotificationReceiver::class.java)
-        sendBroadcast(notificationIntent)
+    // Send a notification
+    private fun sendNotification() {
+        val title = "Test Notification"
+        val text = "This notification was sent from MainActivity!"
+
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle(title)
+            .setContentText(text)
+            .setSmallIcon(R.drawable.ic_notification) // Use your own notification icon here
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setAutoCancel(true)
+            .build()
+
+        NotificationManagerCompat.from(this).notify(NOTIFICATION_ID, notification)
     }
 
     // Unregister the BroadcastReceiver when the activity is destroyed
     override fun onDestroy() {
         super.onDestroy()
         unregisterReceiver(screenTimeReceiver)
+    }
+
+    companion object {
+        private const val CHANNEL_ID = "notification_channel"
+        private const val NOTIFICATION_ID = 1
     }
 }
