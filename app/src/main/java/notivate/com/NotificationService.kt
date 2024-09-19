@@ -5,7 +5,6 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
-import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 
@@ -33,7 +32,7 @@ class NotificationService : Service() {
         startForeground(NOTIFICATION_ID, notification)
 
         // Since this is a foreground service, we stop the service after posting the notification
-        stopForeground(true)
+        stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
 
         return START_NOT_STICKY
