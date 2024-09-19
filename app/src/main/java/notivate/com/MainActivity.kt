@@ -1,64 +1,80 @@
 package notivate.com
 
 import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
-import android.os.SystemClock
+import android.provider.Settings
 import android.widget.Button
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import com.google.android.material.snackbar.Snackbar
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var screenTimeReceiver: BroadcastReceiver
-    private var screenOnStartTime: Long = 0L // Time when screen was turned on
-    private var totalScreenTime: Long = 0L // Accumulated screen time in milliseconds
-    private val oneHourInMillis: Long = 60 * 60 * 1000 // 1 hour in milliseconds
+
+    // Permission request launcher for notifications (API 33+)
+    private val notificationPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            if (!isGranted) {
+                // Handle the case when notification permission is not granted
+                showPermissionDeniedMessage()
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Initialize and register the BroadcastReceiver for screen on/off events
+        // Request notification permission if needed for API 33+
+        requestNotificationPermission()
+
+        // Initialize and register the BroadcastReceiver
         registerScreenTimeReceiver()
 
-        // Set up the button for manual notification (optional for testing purposes)
+        // Button for manual notification (optional for testing)
         val notifyButton: Button = findViewById(R.id.notifyButton)
         notifyButton.setOnClickListener {
-            // Manually trigger a notification (e.g., for testing)
             triggerNotification()
         }
     }
 
-    // Function to register BroadcastReceiver to track screen on/off events
-    private fun registerScreenTimeReceiver() {
-        screenTimeReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context, intent: Intent) {
-                when (intent.action) {
-                    Intent.ACTION_SCREEN_ON -> {
-                        // Screen turned on, start counting screen-on time
-                        screenOnStartTime = SystemClock.elapsedRealtime()
-                    }
-                    Intent.ACTION_SCREEN_OFF -> {
-                        // Screen turned off, accumulate the screen-on time
-                        if (screenOnStartTime != 0L) {
-                            totalScreenTime += SystemClock.elapsedRealtime() - screenOnStartTime
-                            screenOnStartTime = 0L
-                        }
-
-                        // Check if total screen time has exceeded 1 hour
-                        if (totalScreenTime >= oneHourInMillis) {
-                            // Trigger notification to remind the user to take a break
-                            triggerNotification()
-                            totalScreenTime = 0L // Reset the screen-on time after notification
-                        }
-                    }
-                }
-            }
+    // Request notification permission for Android 13 (API 33+) and above
+    private fun requestNotificationPermission() {
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            // Request notification permission
+            notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
         }
+    }
 
-        // Register receiver for screen on/off events
+    // Show a message to the user when the notification permission is denied
+    private fun showPermissionDeniedMessage() {
+        Snackbar.make(
+            findViewById(android.R.id.content),
+            "Notification permission is required to send reminders. Please enable it in the app settings.",
+            Snackbar.LENGTH_LONG
+        ).setAction("Settings") {
+            openAppSettings()
+        }.show()
+    }
+
+    // Open app settings if the user denies the permission and clicks on the "Settings" button
+    private fun openAppSettings() {
+        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+            data = Uri.fromParts("package", packageName, null)
+        }
+        startActivity(intent)
+    }
+
+    // Register the BroadcastReceiver for screen on/off events
+    private fun registerScreenTimeReceiver() {
+        screenTimeReceiver = ScreenTimeReceiver()
         val filter = IntentFilter().apply {
             addAction(Intent.ACTION_SCREEN_ON)
             addAction(Intent.ACTION_SCREEN_OFF)
@@ -66,15 +82,15 @@ class MainActivity : AppCompatActivity() {
         registerReceiver(screenTimeReceiver, filter)
     }
 
-    // Function to trigger the notification
+    // Trigger a manual notification (useful for testing)
     private fun triggerNotification() {
         val notificationIntent = Intent(this, NotificationReceiver::class.java)
         sendBroadcast(notificationIntent)
     }
 
+    // Unregister the BroadcastReceiver when the activity is destroyed
     override fun onDestroy() {
         super.onDestroy()
-        // Unregister the screen time receiver to avoid memory leaks
         unregisterReceiver(screenTimeReceiver)
     }
 }
