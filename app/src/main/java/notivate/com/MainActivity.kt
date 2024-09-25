@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.database.FirebaseDatabase
+import android.util.Log
 
 class MainActivity : AppCompatActivity() {
 

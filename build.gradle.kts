@@ -12,10 +12,3 @@ buildscript {
         classpath(libs.google.services)
     }
 }
-
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-    }
-}

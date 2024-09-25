@@ -48,4 +48,9 @@ dependencies {
     // Firebase dependencies
     implementation(libs.firebase.database.ktx)
     implementation(libs.firebase.analytics.ktx)
+
+    // Android testing dependencies
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit.v115)
+    androidTestImplementation(libs.androidx.espresso.core.v351)
 }
