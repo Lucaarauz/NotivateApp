@@ -90,17 +90,20 @@ class MainActivity : AppCompatActivity() {
 
     // Start the NotificationService to send a notification
     private fun triggerNotificationService() {
+        println("Triggering notification service")
         val notificationIntent = Intent(this, NotificationService::class.java)
         // Pass notification data if needed
         notificationIntent.putExtra("notification_title", "Test Notification")
         notificationIntent.putExtra("notification_text", "This notification was sent from MainActivity!")
         startService(notificationIntent)
+        println("Started service")
 
         // Log notification data to Firebase
         logNotificationToFirebase(
             title = "Test Notification",
             text = "This notification was sent from MainActivity!"
         )
+        println("Logged notification data to firebase")
     }
 
     // Log notification data to Firebase
