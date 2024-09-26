@@ -6,11 +6,14 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Handler
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import com.google.firebase.database.FirebaseDatabase
 import android.util.Log
+import androidx.core.app.ActivityCompat
+import android.Manifest
 
 class NotificationService : Service() {
 
@@ -63,7 +66,16 @@ class NotificationService : Service() {
     private fun startSendingNotifications() {
         handler.post(object : Runnable {
             override fun run() {
-                sendNotification()
+                if (ActivityCompat.checkSelfPermission(
+                        this@NotificationService,
+                        Manifest.permission.FOREGROUND_SERVICE
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) {
+                    sendNotification()
+                } else {
+                    // Handle permission denial - maybe stop the service
+                    stopSelf()
+                }
                 // Schedule the next notification
                 handler.postDelayed(this, NOTIFICATION_INTERVAL_MS)
             }
