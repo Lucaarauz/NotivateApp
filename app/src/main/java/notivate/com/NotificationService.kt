@@ -120,7 +120,8 @@ class NotificationService : Service() {
 
     // Log notification data to Firebase
     private fun logNotificationToFirebase(title: String, text: String) {
-        val database = FirebaseDatabase.getInstance().getReference("notifications")
+        val database = FirebaseDatabase.getInstance("https://notivateapp-8fa87-default-rtdb.europe-west1.firebasedatabase.app")
+            .getReference("notifications")
         val notificationData = mapOf(
             "timestamp" to System.currentTimeMillis(),
             "title" to title,
