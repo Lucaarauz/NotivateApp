@@ -88,7 +88,13 @@ class NotificationService : Service() {
         val intent = Intent(this, NotificationClickActivity::class.java).apply {
             putExtra("notificationId", "test_notification_id")
         }
-        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+
+        val pendingIntent = PendingIntent.getActivity(
+            this,
+            0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(title)

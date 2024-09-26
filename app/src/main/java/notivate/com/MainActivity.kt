@@ -105,7 +105,6 @@ class MainActivity : AppCompatActivity() {
 
     // Log notification data to Firebase
     private fun logNotificationToFirebase(title: String, text: String) {
-        println("Sending notification to Firebase: $title - $text")
         val database = FirebaseDatabase.getInstance().getReference("notifications")
         val notificationData = mapOf(
             "timestamp" to System.currentTimeMillis(),
@@ -120,8 +119,6 @@ class MainActivity : AppCompatActivity() {
             .addOnFailureListener { e ->
                 Log.e("Firebase", "Failed to log notification data: ${e.message}")
             }
-
-        println("database.push")
     }
 
     // Unregister the BroadcastReceiver when the activity is destroyed
