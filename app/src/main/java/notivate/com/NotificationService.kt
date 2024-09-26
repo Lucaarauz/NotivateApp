@@ -14,6 +14,7 @@ import com.google.firebase.database.FirebaseDatabase
 import android.util.Log
 import androidx.core.app.ActivityCompat
 import android.Manifest
+import android.util.Log.d
 
 class NotificationService : Service() {
 
@@ -130,7 +131,7 @@ class NotificationService : Service() {
 
         database.push().setValue(notificationData)
             .addOnSuccessListener {
-                Log.d("Firebase", "Notification data logged successfully")
+                d("Firebase", "Notification data logged successfully")
             }
             .addOnFailureListener { e ->
                 Log.e("Firebase", "Failed to log notification data: ${e.message}")
