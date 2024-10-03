@@ -35,7 +35,7 @@
             android:name=".NotificationService"
             android:enabled="true"
             android:exported="false"
-            android:foregroundServiceType="remoteMessaging" />
+            android:foregroundServiceType="dataSync" /> <!-- Changed to dataSync -->
 
         <!-- Broadcast Receiver for screen time tracking -->
         <receiver

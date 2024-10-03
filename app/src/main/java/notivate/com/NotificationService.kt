@@ -6,44 +6,41 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Handler
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
-import com.google.firebase.database.FirebaseDatabase
 import android.util.Log
-import androidx.core.app.ActivityCompat
-import android.Manifest
-import android.util.Log.d
+import com.google.firebase.database.FirebaseDatabase
 
 class NotificationService : Service() {
 
     companion object {
         private const val CHANNEL_ID = "notification_channel"
         private const val NOTIFICATION_ID = 1
-        private const val NOTIFICATION_INTERVAL_MS = 60000L // 1 minute
+        private const val NOTIFICATION_INTERVAL_MS = 3600000L // 1 hour
     }
 
     private val handler = Handler()
     private val notificationTexts = listOf(
         "Reminder: Take a break!",
-        "Don't forget to stretch!",
+        "You have been on your phone for too long today.",
         "How about a quick walk?",
         "Time to rest your eyes!",
-        "Stay hydrated!"
     )
     private var currentNotificationIndex = 0
 
     override fun onCreate() {
         super.onCreate()
-        // Create notification channel for Android versions O and above
         createNotificationChannel()
-        // Start sending notifications
+        // Start sending notifications at regular intervals
         startSendingNotifications()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        // We don't need to build a notification here since notifications are handled by the Handler
+        // Check if we need to send an immediate notification
+        if (intent?.getBooleanExtra("send_now", false) == true) {
+            sendNotification()
+        }
         return START_STICKY
     }
 
@@ -64,42 +61,24 @@ class NotificationService : Service() {
         notificationManager.createNotificationChannel(channel)
     }
 
-    private fun startSendingNotifications() {
-        handler.post(object : Runnable {
-            override fun run() {
-                if (ActivityCompat.checkSelfPermission(
-                        this@NotificationService,
-                        Manifest.permission.FOREGROUND_SERVICE
-                    ) == PackageManager.PERMISSION_GRANTED
-                ) {
-                    sendNotification()
-                } else {
-                    // Handle permission denial - maybe stop the service
-                    stopSelf()
-                }
-                // Schedule the next notification
-                handler.postDelayed(this, NOTIFICATION_INTERVAL_MS)
-            }
-        })
-    }
-
     private fun sendNotification() {
-        val title = "Notification Alert"
+        val title = "Reminder"
         val text = notificationTexts[currentNotificationIndex]
         currentNotificationIndex = (currentNotificationIndex + 1) % notificationTexts.size
 
         val notification = buildNotification(title, text)
 
-        // Display the notification
-        startForeground(NOTIFICATION_ID, notification)
+        // Update the notification
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.notify(NOTIFICATION_ID, notification)
 
         // Log notification data to Firebase
         logNotificationToFirebase(title, text)
     }
 
     private fun buildNotification(title: String, text: String): Notification {
-        val intent = Intent(this, NotificationClickActivity::class.java).apply {
-            putExtra("notificationId", "test_notification_id")
+        val intent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
 
         val pendingIntent = PendingIntent.getActivity(
@@ -108,21 +87,28 @@ class NotificationService : Service() {
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        println("Sending notification?")
+
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(title)
             .setContentText(text)
-            .setSmallIcon(R.drawable.ic_notification) // Use your own notification icon here
+            .setSmallIcon(R.drawable.ic_notification) // Use your own notification icon
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .build()
     }
 
-    // Log notification data to Firebase
+    private fun startSendingNotifications() {
+        handler.post(object : Runnable {
+            override fun run() {
+                sendNotification()
+                handler.postDelayed(this, NOTIFICATION_INTERVAL_MS)
+            }
+        })
+    }
+
     private fun logNotificationToFirebase(title: String, text: String) {
-        val database = FirebaseDatabase.getInstance("https://notivateapp-8fa87-default-rtdb.europe-west1.firebasedatabase.app")
-            .getReference("notifications")
+        val database = FirebaseDatabase.getInstance("https://your-database-url").getReference("notifications")
         val notificationData = mapOf(
             "timestamp" to System.currentTimeMillis(),
             "title" to title,
@@ -131,7 +117,7 @@ class NotificationService : Service() {
 
         database.push().setValue(notificationData)
             .addOnSuccessListener {
-                d("Firebase", "Notification data logged successfully")
+                Log.d("Firebase", "Notification data logged successfully")
             }
             .addOnFailureListener { e ->
                 Log.e("Firebase", "Failed to log notification data: ${e.message}")

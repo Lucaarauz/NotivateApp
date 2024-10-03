@@ -35,9 +35,6 @@ class MainActivity : AppCompatActivity() {
         // Request notification permission if needed for API 33+
         requestNotificationPermission()
 
-        // Initialize and register the BroadcastReceiver
-        registerScreenTimeReceiver()
-
         // Button for manual notification
         val notifyButton: Button = findViewById(R.id.notifyButton)
         notifyButton.setOnClickListener {
@@ -90,10 +87,9 @@ class MainActivity : AppCompatActivity() {
 
     // Start the NotificationService to send a notification
     private fun triggerNotificationService() {
-        val notificationIntent = Intent(this, NotificationService::class.java)
-        // Pass notification data if needed
-        notificationIntent.putExtra("notification_title", "Test Notification")
-        notificationIntent.putExtra("notification_text", "This notification was sent from MainActivity!")
+        val notificationIntent = Intent(this, NotificationService::class.java).apply {
+            putExtra("send_now", true)  // Indicate that we want to send a notification now
+        }
         startService(notificationIntent)
 
         // Log notification data to Firebase
