@@ -1,67 +1,121 @@
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.Service
+package notivate.com
+
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.IBinder
+import android.os.SystemClock
 import android.util.Log
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
-import notivate.com.R
+import com.google.firebase.database.FirebaseDatabase
 
-class NotificationService : Service() {
+class ScreenTimeReceiver : BroadcastReceiver() {
 
-    private val NOTIFICATION_ID = 1
-    private val CHANNEL_ID = "my_notification_channel" // Define your notification channel ID
+    private var screenOnStart: Long = 0L
+    private var totalScreenOnTime: Long = 0L
+    private var nextNotificationTime: Long = 60 * 1000L // 1 minute for testing (change to 60 * 60 * 1000L for 1 hour)
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (intent != null && intent.getBooleanExtra("send_now", false)) {
-            sendNotification()
-        }
-        return START_STICKY
+    init {
+        Log.d("ScreenTimeReceiver", "ScreenTimeReceiver initialized.")
     }
 
-    private fun sendNotification() {
-        // Check if the notification channel exists, if not, create it
-        createNotificationChannel()
+    override fun onReceive(context: Context, intent: Intent) {
+        when (intent.action) {
+            Intent.ACTION_SCREEN_ON -> {
+                Log.d("ScreenTimeReceiver", "Screen ON action received.")
+                screenOnStart = SystemClock.elapsedRealtime()
+                Log.d("ScreenTimeReceiver", "Screen turned on at $screenOnStart")
 
-        // Check for the notification permission
-        if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
-            // Create and send the notification
-            val notification = NotificationCompat.Builder(this, CHANNEL_ID)
-                .setContentTitle("Test Notification")
-                .setContentText("This notification was sent from NotificationService!")
-                .setSmallIcon(R.drawable.ic_notification) // Change to your notification icon
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .build()
-
-            // Send the notification
-            with(NotificationManagerCompat.from(this)) {
-                notify(NOTIFICATION_ID, notification)
+                // Schedule notification check every 10 seconds while the screen is on
+                scheduleNotificationCheck(context)
             }
+            Intent.ACTION_SCREEN_OFF -> {
+                Log.d("ScreenTimeReceiver", "Screen OFF action received.")
+                if (screenOnStart != 0L) {
+                    // Calculate time the screen was on during this session
+                    val elapsedTime = SystemClock.elapsedRealtime() - screenOnStart
+                    totalScreenOnTime += elapsedTime
+                    Log.d("ScreenTimeReceiver", "Screen turned off after ${elapsedTime / 1000} seconds, total time = ${totalScreenOnTime / 1000} seconds")
+                    screenOnStart = 0L
 
-            Log.d("NotificationService", "Notification sent successfully.")
+                    // Cancel any scheduled notifications when the screen turns off
+                    cancelNotificationCheck(context)
+                }
+            }
+        }
+    }
+
+    // Schedules a check for sending notifications
+    private fun scheduleNotificationCheck(context: Context) {
+        Log.d("ScreenTimeReceiver", "Scheduling notification check.")
+
+        // Check if it's time to send a notification
+        if (totalScreenOnTime >= nextNotificationTime) {
+            Log.d("ScreenTimeReceiver", "It's time to send a notification.")
+            sendNotification(context)
+
+            // Update the next notification time to the next minute (or hour for production)
+            nextNotificationTime += 60 * 1000L // Add 1 minute for testing, or 60 * 60 * 1000L for 1 hour
+            Log.d("ScreenTimeReceiver", "Next notification time set to ${nextNotificationTime / 1000} seconds.")
         } else {
-            Log.d("NotificationService", "Notification permission not granted.")
-        }
-    }
-
-    private fun createNotificationChannel() {
-        val name = "My Notification Channel"
-        val descriptionText = "Channel for app notifications"
-        val importance = NotificationManager.IMPORTANCE_DEFAULT
-        val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
-            description = descriptionText
+            Log.d("ScreenTimeReceiver", "Not yet time for the next notification.")
         }
 
-        // Register the channel with the system
-        val notificationManager: NotificationManager = getSystemService(NotificationManager::class.java)
-        notificationManager.createNotificationChannel(channel)
+        // Schedule a check every 10 seconds
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val checkIntent = Intent(context, ScreenTimeReceiver::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(context, 0, checkIntent, PendingIntent.FLAG_UPDATE_CURRENT)
 
-        Log.d("NotificationService", "Notification channel created.")
+        alarmManager.set(
+            AlarmManager.ELAPSED_REALTIME_WAKEUP,
+            SystemClock.elapsedRealtime() + 10 * 1000L, // Check every 10 seconds
+            pendingIntent
+        )
+        Log.d("ScreenTimeReceiver", "Notification check scheduled for 10 seconds from now.")
     }
 
-    override fun onBind(intent: Intent?): IBinder? {
-        return null
+    // Cancels the notification check when the screen is off
+    private fun cancelNotificationCheck(context: Context) {
+        Log.d("ScreenTimeReceiver", "Cancelling notification scheduling.")
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val checkIntent = Intent(context, ScreenTimeReceiver::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(context, 0, checkIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+        alarmManager.cancel(pendingIntent)
+        Log.d("ScreenTimeReceiver", "Notification scheduling canceled.")
+    }
+
+    // Sends the notification using the method from MainActivity
+    private fun sendNotification(context: Context) {
+        Log.d("ScreenTimeReceiver", "Sending notification...")
+        val notificationIntent = Intent(context, NotificationService::class.java).apply {
+            putExtra("send_now", true) // Indicate that we want to send a notification now
+        }
+        context.startService(notificationIntent)
+
+        // Log notification data to Firebase
+        logNotificationToFirebase(
+            context,
+            title = "Screen Time Notification",
+            text = "You've used your phone for another hour (1 minute for testing)!"
+        )
+    }
+
+    // Logs notification data to Firebase
+    private fun logNotificationToFirebase(context: Context, title: String, text: String) {
+        Log.d("ScreenTimeReceiver", "Logging notification to Firebase.")
+        val database = FirebaseDatabase.getInstance().getReference("notifications")
+        val notificationData = mapOf(
+            "timestamp" to System.currentTimeMillis(),
+            "title" to title,
+            "text" to text
+        )
+
+        database.push().setValue(notificationData)
+            .addOnSuccessListener {
+                Log.d("Firebase", "Notification data logged successfully")
+            }
+            .addOnFailureListener { e ->
+                Log.e("Firebase", "Failed to log notification data: ${e.message}")
+            }
     }
 }

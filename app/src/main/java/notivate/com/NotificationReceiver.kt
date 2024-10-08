@@ -7,13 +7,11 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.Build
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 
 class NotificationReceiver : BroadcastReceiver() {
-
     companion object {
         const val CHANNEL_ID = "ScreenTimeChannel"
         const val NOTIFICATION_ID = 1001
