@@ -48,6 +48,7 @@ dependencies {
     // Firebase dependencies
     implementation(libs.firebase.database.ktx)
     implementation(libs.firebase.analytics.ktx)
+    implementation(libs.androidx.media3.common.ktx)
 
     // Android testing dependencies
     testImplementation(libs.junit)
