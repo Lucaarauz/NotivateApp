@@ -10,23 +10,22 @@ import android.os.Handler
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import android.util.Log
-import com.google.firebase.database.FirebaseDatabase
 
 class NotificationService : Service() {
 
     companion object {
         private const val CHANNEL_ID = "notification_channel"
         private const val NOTIFICATION_ID = 1
-        private const val NOTIFICATION_INTERVAL_MS = 3600000L // 1 hour
+        private const val NOTIFICATION_INTERVAL_MS = 30000L // 30 seconds
     }
 
     private val handler = Handler()
     private val notificationTexts = listOf(
         "Reminder: Take a break!",
-        "You have been on your phone for very long today.",
+        "You have been on your phone for too long today.",
         "How about a quick walk?",
         "Time to rest your eyes!",
-        "You have been on your phone for a while, take a break>"
+        "You've been on your phone for a while, take a break!"
     )
     private var currentNotificationIndex = 0
 
@@ -38,10 +37,7 @@ class NotificationService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        // Check if we need to send an immediate notification
-        if (intent?.getBooleanExtra("send_now", false) == true) {
-            sendNotification()
-        }
+        // You can add additional logic here if needed
         return START_STICKY
     }
 
@@ -73,8 +69,7 @@ class NotificationService : Service() {
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(NOTIFICATION_ID, notification)
 
-        // Log notification data to Firebase
-        logNotificationToFirebase(title, text)
+        Log.d("NotificationService", "Notification sent: $text")
     }
 
     private fun buildNotification(title: String, text: String): Notification {
@@ -108,20 +103,8 @@ class NotificationService : Service() {
         })
     }
 
-    private fun logNotificationToFirebase(title: String, text: String) {
-        val database = FirebaseDatabase.getInstance("https://your-database-url").getReference("notifications")
-        val notificationData = mapOf(
-            "timestamp" to System.currentTimeMillis(),
-            "title" to title,
-            "text" to text
-        )
-
-        database.push().setValue(notificationData)
-            .addOnSuccessListener {
-                Log.d("Firebase", "Notification data logged successfully")
-            }
-            .addOnFailureListener { e ->
-                Log.e("Firebase", "Failed to log notification data: ${e.message}")
-            }
+    override fun onDestroy() {
+        super.onDestroy()
+        handler.removeCallbacksAndMessages(null) // Stop sending notifications when service is destroyed
     }
 }

@@ -8,36 +8,26 @@ import android.util.Log
 
 class ScreenTimeReceiver : BroadcastReceiver() {
 
-    private var screenOnStart: Long = 0L // Time when the screen was turned on
-    private val thirtySecondsMillis: Long = 30 * 1000 // 30 seconds in milliseconds
+    private var screenOnStart: Long = 0L
 
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == Intent.ACTION_SCREEN_ON) {
-            // Screen turned on, start tracking time
             screenOnStart = SystemClock.elapsedRealtime()
             Log.d("ScreenTimeReceiver", "Screen turned on at $screenOnStart")
+
+            // Start NotificationService to send notifications every 30 seconds
+            val serviceIntent = Intent(context, NotificationService::class.java)
+            context.startService(serviceIntent) // Start the NotificationService
         } else if (intent.action == Intent.ACTION_SCREEN_OFF) {
-            // Screen turned off, calculate elapsed time
             if (screenOnStart != 0L) {
                 val elapsedTime = SystemClock.elapsedRealtime() - screenOnStart
                 Log.d("ScreenTimeReceiver", "Screen turned off after ${elapsedTime / 1000} seconds")
+                screenOnStart = 0L
 
-                // Check if 30 seconds have passed to send a notification
-                if (elapsedTime >= thirtySecondsMillis) {
-                    sendNotification(context, "30 Seconds Screen Time", "You have been using your phone for 30 seconds. Time for a break!")
-                    Log.d("ScreenTimeReceiver", "30 seconds notification sent.")
-                }
-                screenOnStart = 0L // Reset the start time
+                // Optionally, stop the NotificationService if you want to stop notifications when the screen is off
+                val serviceIntent = Intent(context, NotificationService::class.java)
+                context.stopService(serviceIntent) // Stop the NotificationService
             }
         }
-    }
-
-    private fun sendNotification(context: Context, title: String, message: String) {
-        // Create an intent to start the NotificationService with the notification details
-        val notificationIntent = Intent(context, NotificationService::class.java).apply {
-            putExtra("notification_title", title)
-            putExtra("notification_message", message)
-        }
-        context.startService(notificationIntent) // Start the service to send the notification
     }
 }
