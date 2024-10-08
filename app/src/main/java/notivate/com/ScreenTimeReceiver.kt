@@ -3,7 +3,6 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
@@ -27,27 +26,8 @@ class NotificationService : Service() {
         createNotificationChannel()
 
         // Check for the notification permission
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
-                // Create and send the notification
-                val notification = NotificationCompat.Builder(this, CHANNEL_ID)
-                    .setContentTitle("Test Notification")
-                    .setContentText("This notification was sent from NotificationService!")
-                    .setSmallIcon(R.drawable.ic_notification) // Change to your notification icon
-                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                    .build()
-
-                // Send the notification
-                with(NotificationManagerCompat.from(this)) {
-                    notify(NOTIFICATION_ID, notification)
-                }
-
-                Log.d("NotificationService", "Notification sent successfully.")
-            } else {
-                Log.d("NotificationService", "Notification permission not granted.")
-            }
-        } else {
-            // For devices below Android 13, send the notification without checking
+        if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+            // Create and send the notification
             val notification = NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle("Test Notification")
                 .setContentText("This notification was sent from NotificationService!")
@@ -60,7 +40,9 @@ class NotificationService : Service() {
                 notify(NOTIFICATION_ID, notification)
             }
 
-            Log.d("NotificationService", "Notification sent successfully (below Android 13).")
+            Log.d("NotificationService", "Notification sent successfully.")
+        } else {
+            Log.d("NotificationService", "Notification permission not granted.")
         }
     }
 
