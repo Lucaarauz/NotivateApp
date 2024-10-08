@@ -23,9 +23,10 @@ class NotificationService : Service() {
     private val handler = Handler()
     private val notificationTexts = listOf(
         "Reminder: Take a break!",
-        "You have been on your phone for too long today.",
+        "You have been on your phone for very long today.",
         "How about a quick walk?",
         "Time to rest your eyes!",
+        "You have been on your phone for a while, take a break>"
     )
     private var currentNotificationIndex = 0
 
