@@ -34,6 +34,7 @@ class MainActivity : AppCompatActivity() {
 
         // Request notification permission if needed for API 33+
         requestNotificationPermission()
+        registerScreenTimeReceiver()
 
         // Button for manual notification
         val notifyButton: Button = findViewById(R.id.notifyButton)
