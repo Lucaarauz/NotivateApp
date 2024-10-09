@@ -96,7 +96,7 @@ class ScreenTimeReceiver : BroadcastReceiver() {
         logNotificationToFirebase(
             context,
             title = "Screen Time Notification",
-            text = "You've used your phone for another hour (1 minute for testing)!"
+            text = "You've used your phone for another hour!"
         )
     }
 
