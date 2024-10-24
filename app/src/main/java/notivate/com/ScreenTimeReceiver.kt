@@ -15,6 +15,16 @@ class ScreenTimeReceiver : BroadcastReceiver() {
     private var totalScreenOnTime: Long = 0L
     private var nextNotificationTime: Long = 60 * 1000L // 1 minute for testing (change to 60 * 60 * 1000L for 1 hour)
 
+    private val notificationTexts = listOf(
+        "Reminder: Take a break!",
+        "You have been on your phone for too long today.",
+        "How about a quick walk?",
+        "Time to rest your eyes!",
+        "You've been on your phone for a while, take a break!"
+    )
+    private var currentNotificationIndex = 0
+
+
     init {
         Log.d("ScreenTimeReceiver", "ScreenTimeReceiver initialized.")
     }
@@ -84,20 +94,22 @@ class ScreenTimeReceiver : BroadcastReceiver() {
         Log.d("ScreenTimeReceiver", "Notification scheduling canceled.")
     }
 
+
     // Sends the notification using the method from MainActivity
     private fun sendNotification(context: Context) {
-        Log.d("ScreenTimeReceiver", "Sending notification...")
+        val title = "Reminder" // or any title you want for the notification
+        val text = notificationTexts[currentNotificationIndex]
+        currentNotificationIndex =(currentNotificationIndex + 1) % notificationTexts.size
+
+        // Start the NotificationService using an Intent
         val notificationIntent = Intent(context, NotificationService::class.java).apply {
-            putExtra("send_now", true) // Indicate that we want to send a notification now
+            putExtra("title", title)
+            putExtra("text", text)
         }
         context.startService(notificationIntent)
 
-        // Log notification data to Firebase
-        logNotificationToFirebase(
-            context,
-            title = "Screen Time Notification",
-            text = "You've used your phone for another hour!"
-        )
+        // Log notification data to Firebase (if needed)
+        logNotificationToFirebase(context, title, text)
     }
 
     // Logs notification data to Firebase
