@@ -94,7 +94,6 @@ class ScreenTimeReceiver : BroadcastReceiver() {
         Log.d("ScreenTimeReceiver", "Notification scheduling canceled.")
     }
 
-
     // Sends the notification using the method from MainActivity
     private fun sendNotification(context: Context) {
         val title = "Reminder" // or any title you want for the notification

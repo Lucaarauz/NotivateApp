@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "notivate.com"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "notivate.com"
