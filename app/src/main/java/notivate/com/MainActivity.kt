@@ -92,30 +92,6 @@ class MainActivity : AppCompatActivity() {
             putExtra("send_now", true)  // Indicate that we want to send a notification now
         }
         startService(notificationIntent)
-
-        // Log notification data to Firebase
-        logNotificationToFirebase(
-            title = "Test Notification",
-            text = "This notification was sent from MainActivity!"
-        )
-    }
-
-    // Log notification data to Firebase
-    private fun logNotificationToFirebase(title: String, text: String) {
-        val database = FirebaseDatabase.getInstance().getReference("notifications")
-        val notificationData = mapOf(
-            "timestamp" to System.currentTimeMillis(),
-            "title" to title,
-            "text" to text
-        )
-
-        database.push().setValue(notificationData)
-            .addOnSuccessListener {
-                Log.d("Firebase", "Notification data logged successfully")
-            }
-            .addOnFailureListener { e ->
-                Log.e("Firebase", "Failed to log notification data: ${e.message}")
-            }
     }
 
     // Unregister the BroadcastReceiver when the activity is destroyed

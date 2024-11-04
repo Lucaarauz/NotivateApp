@@ -96,7 +96,7 @@ class ScreenTimeReceiver : BroadcastReceiver() {
 
     // Sends the notification using the method from MainActivity
     private fun sendNotification(context: Context) {
-        val title = "Reminder" // or any title you want for the notification
+        val title = "Reminder"
         val text = notificationTexts[currentNotificationIndex]
         currentNotificationIndex =(currentNotificationIndex + 1) % notificationTexts.size
 
@@ -106,27 +106,5 @@ class ScreenTimeReceiver : BroadcastReceiver() {
             putExtra("text", text)
         }
         context.startService(notificationIntent)
-
-        // Log notification data to Firebase (if needed)
-        logNotificationToFirebase(context, title, text)
-    }
-
-    // Logs notification data to Firebase
-    private fun logNotificationToFirebase(context: Context, title: String, text: String) {
-        Log.d("ScreenTimeReceiver", "Logging notification to Firebase.")
-        val database = FirebaseDatabase.getInstance().getReference("notifications")
-        val notificationData = mapOf(
-            "timestamp" to System.currentTimeMillis(),
-            "title" to title,
-            "text" to text
-        )
-
-        database.push().setValue(notificationData)
-            .addOnSuccessListener {
-                Log.d("Firebase", "Notification data logged successfully")
-            }
-            .addOnFailureListener { e ->
-                Log.e("Firebase", "Failed to log notification data: ${e.message}")
-            }
     }
 }

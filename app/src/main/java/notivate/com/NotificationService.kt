@@ -10,6 +10,7 @@ import android.os.Handler
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import android.util.Log
+import com.google.firebase.database.FirebaseDatabase
 
 class NotificationService : Service() {
 
@@ -84,6 +85,11 @@ class NotificationService : Service() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
+        logNotificationToFirebase(
+            title = title,
+            text = text
+        )
+
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(title)
             .setContentText(text)
@@ -106,5 +112,22 @@ class NotificationService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         handler.removeCallbacksAndMessages(null) // Stop sending notifications when service is destroyed
+    }
+
+    private fun logNotificationToFirebase(title: String, text: String) {
+        val database = FirebaseDatabase.getInstance().getReference("notifications")
+        val notificationData = mapOf(
+            "timestamp" to System.currentTimeMillis(),
+            "title" to title,
+            "text" to text
+        )
+
+        database.push().setValue(notificationData)
+            .addOnSuccessListener {
+                Log.d("Firebase", "Notification data logged successfully")
+            }
+            .addOnFailureListener { e ->
+                Log.e("Firebase", "Failed to log notification data: ${e.message}")
+            }
     }
 }
