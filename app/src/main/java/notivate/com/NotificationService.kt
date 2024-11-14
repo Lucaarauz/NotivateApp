@@ -84,12 +84,10 @@ class NotificationService : Service() {
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
-        // Start sending notifications at regular intervals
-        startSendingNotifications()
+        startSendingNotifications()    // Start sending notifications at regular intervals
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        // You can add additional logic here if needed
         return START_STICKY
     }
 
@@ -135,8 +133,7 @@ class NotificationService : Service() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        logNotificationToFirebase(
-            title = title,
+        logNotificationToFirebase(title = title,
             text = text
         )
 
@@ -169,7 +166,8 @@ class NotificationService : Service() {
         val notificationData = mapOf(
             "timestamp" to System.currentTimeMillis(),
             "title" to title,
-            "text" to text
+            "text" to text,
+            "clicked" to false // Start as false and can be edited later
         )
 
         database.push().setValue(notificationData)

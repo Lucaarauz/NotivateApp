@@ -1,34 +1,48 @@
 package notivate.com
 
-import android.os.Bundle
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
 import android.util.Log
-import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.database.FirebaseDatabase
 
-class NotificationClickActivity : AppCompatActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+class NotificationClickReceiver : BroadcastReceiver() {
 
-        // Log the click data to Firebase
-        sendClickDataToFirebase()
-
-        // Close the activity once the data is sent
-        finish()
+    companion object {
+        const val TAG = "NotificationClickReceiver"
     }
 
-    private fun sendClickDataToFirebase() {
-        val database = FirebaseDatabase.getInstance().getReference("clicks")
-        val clickData = mapOf(
+    override fun onReceive(context: Context, intent: Intent?) {
+        // Retrieve the notification ID and click status
+        val notificationId = intent?.getIntExtra("notification_id", -1) ?: -1
+        val clicked = intent?.getBooleanExtra("clicked", false) ?: false
+
+        // Print a log message to confirm the click event was received
+        Log.d(TAG, "Notification clicked! ID: $notificationId, Clicked: $clicked")
+
+        if (notificationId != -1) {
+            // Log the click event to Firebase
+            logNotificationClickToFirebase(notificationId, clicked)
+        }
+    }
+
+    private fun logNotificationClickToFirebase(notificationId: Int, clicked: Boolean) {
+        val database = FirebaseDatabase.getInstance().getReference("notifications")
+        val notificationClickData = mapOf(
             "timestamp" to System.currentTimeMillis(),
-            "notificationId" to "unique_notification_id"  // Ideally, use an actual notification ID
+            "notification_id" to notificationId,
+            "clicked" to clicked
         )
 
-        database.push().setValue(clickData)
+        // Push the data to Firebase
+        database.push().setValue(notificationClickData)
             .addOnSuccessListener {
-                Log.d("Firebase", "Click data sent successfully")
+                // Successfully logged click event
+                Log.d(TAG, "Notification click logged successfully.")
             }
-            .addOnFailureListener { e: Exception ->
-                Log.e("Firebase", "Failed to send data: ${e.message}")
+            .addOnFailureListener { e ->
+                // Failed to log click event
+                Log.e(TAG, "Failed to log notification click: ${e.message}")
             }
     }
 }
