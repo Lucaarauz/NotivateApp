@@ -8,6 +8,7 @@ import android.app.Service
 import android.content.Intent
 import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import androidx.core.app.NotificationCompat
 import android.util.Log
 import com.google.firebase.database.FirebaseDatabase
@@ -21,7 +22,9 @@ class NotificationService : Service() {
         private const val NOTIFICATION_INTERVAL_MS = 30000L // 30 seconds
     }
 
-    private val handler = Handler()
+    //private val handler = Handler()
+    private val handler = Handler(Looper.getMainLooper())
+
     private val notificationTexts = listOf(
         "Reminder: Take a break!",
         "You have been on your phone for too long today.",
