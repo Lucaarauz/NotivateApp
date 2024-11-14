@@ -81,8 +81,6 @@ class NotificationService : Service() {
         "Health Alert"
     )
 
-    private var currentNotificationIndex = 0
-
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
@@ -114,8 +112,7 @@ class NotificationService : Service() {
 
     private fun sendNotification() {
         val title = notificationTitles[Random.nextInt(notificationTitles.size)]
-        val text = notificationTexts[currentNotificationIndex]
-        currentNotificationIndex = (currentNotificationIndex + 1) % notificationTexts.size
+        val text = notificationTexts[Random.nextInt(notificationTexts.size)]
 
         val notification = buildNotification(title, text)
 
