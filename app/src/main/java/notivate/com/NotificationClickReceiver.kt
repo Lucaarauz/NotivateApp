@@ -37,11 +37,9 @@ class NotificationClickReceiver : BroadcastReceiver() {
         // Push the data to Firebase
         database.push().setValue(notificationClickData)
             .addOnSuccessListener {
-                // Successfully logged click event
                 Log.d(TAG, "Notification click logged successfully.")
             }
             .addOnFailureListener { e ->
-                // Failed to log click event
                 Log.e(TAG, "Failed to log notification click: ${e.message}")
             }
     }
