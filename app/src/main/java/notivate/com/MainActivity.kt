@@ -13,8 +13,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
-import com.google.firebase.database.FirebaseDatabase
-import android.util.Log
 
 class MainActivity : AppCompatActivity() {
 
@@ -37,14 +35,11 @@ class MainActivity : AppCompatActivity() {
         registerScreenTimeReceiver()
 
         // Button for manual notification
-        val notifyButton: Button = findViewById(R.id.notifyButton)
-        notifyButton.setOnClickListener {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
-                == PackageManager.PERMISSION_GRANTED) {
-                triggerNotificationService()
-            } else {
-                showPermissionDeniedMessage()
-            }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+            == PackageManager.PERMISSION_GRANTED) {
+            triggerNotificationService()
+        } else {
+            showPermissionDeniedMessage()
         }
     }
 
