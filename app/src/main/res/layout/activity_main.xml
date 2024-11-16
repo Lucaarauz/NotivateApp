@@ -3,4 +3,46 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity"/>
+    android:textAlignment="center"
+    tools:context=".MainActivity"
+    android:background="@drawable/background"
+    >
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="234dp"
+        android:layout_height="178dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="98dp"
+        android:layout_marginBottom="42dp"
+        android:text="Many people overuse their phones without even noticing it, this app aims to reduce the amount of time that you waste on your phone. "
+        android:textAlignment="center"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp" />
+
+    <TextClock
+        android:id="@+id/textClock"
+        android:layout_width="200dp"
+        android:layout_height="122dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="99dp"
+        android:layout_marginTop="110dp"
+        android:textAlignment="center"
+        android:textColor="#FFFFFF"
+        android:textSize="40sp" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="35dp"
+        android:layout_marginBottom="11dp"
+        android:text="Created by: Mihajlo Duric and Luca Arauz van Westering"
+        android:textColor="#FFFFFF" />
+
+
+</RelativeLayout>
