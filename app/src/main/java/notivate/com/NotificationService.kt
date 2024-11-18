@@ -122,19 +122,17 @@ class NotificationService : Service() {
     }
 
     private fun buildNotification(title: String, text: String): Notification {
-        val intent = Intent(this, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        val notificationKey = logNotificationToFirebase(title, text) // Get the unique Firebase key
+
+        val clickIntent = Intent(this, NotificationClickActivity::class.java).apply {
+            putExtra("notification_key", notificationKey) // Pass the key
         }
 
-        val pendingIntent = PendingIntent.getActivity(
+        val clickPendingIntent = PendingIntent.getActivity(
             this,
             0,
-            intent,
+            clickIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        logNotificationToFirebase(title = title,
-            text = text
         )
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
@@ -142,7 +140,7 @@ class NotificationService : Service() {
             .setContentText(text)
             .setSmallIcon(R.drawable.ic_notification) // Use your own notification icon
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .setContentIntent(pendingIntent)
+            .setContentIntent(clickPendingIntent)  // Attach the PendingIntent
             .setAutoCancel(true)
             .build()
     }
@@ -161,21 +159,25 @@ class NotificationService : Service() {
         handler.removeCallbacksAndMessages(null) // Stop sending notifications when service is destroyed
     }
 
-    private fun logNotificationToFirebase(title: String, text: String) {
+    private fun logNotificationToFirebase(title: String, text: String): String? {
         val database = FirebaseDatabase.getInstance().getReference("notifications")
         val notificationData = mapOf(
             "timestamp" to System.currentTimeMillis(),
             "title" to title,
             "text" to text,
-            "clicked" to false // Start as false and can be edited later
+            "clicked" to false // Initially set as not clicked
         )
 
-        database.push().setValue(notificationData)
+        // Push the notification data and get the unique key
+        val notificationRef = database.push()
+        notificationRef.setValue(notificationData)
             .addOnSuccessListener {
-                Log.d("Firebase", "Notification data logged successfully")
+                Log.d("Firebase", "Notification data logged successfully with key: ${notificationRef.key}")
             }
             .addOnFailureListener { e ->
                 Log.e("Firebase", "Failed to log notification data: ${e.message}")
             }
+
+        return notificationRef.key // Return the generated unique key
     }
 }

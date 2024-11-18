@@ -10,28 +10,31 @@ class NotificationClickActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Log the click event to Firebase
-        logNotificationClickToFirebase()
+        // Retrieve the key from the intent
+        val notificationKey = intent.getStringExtra("notification_key")
 
-        // Finish immediately as you don't need any UI
+        if (notificationKey != null) {
+            Log.d("NotificationClickActivity", "Notification clicked. Key: $notificationKey")
+            updateNotificationClickedInFirebase(notificationKey)
+        } else {
+            Log.e("NotificationClickActivity", "No notification key found in the intent.")
+        }
+
+        // Close this activity after updating
         finish()
     }
 
-    private fun logNotificationClickToFirebase() {
-        val database = FirebaseDatabase.getInstance().getReference("notification_clicks")
+    private fun updateNotificationClickedInFirebase(notificationKey: String) {
+        val database = FirebaseDatabase.getInstance().getReference("notifications")
+        val updateData = mapOf("clicked" to true)
 
-        // Log a click event to Firebase with a timestamp
-        val clickData = mapOf(
-            "timestamp" to System.currentTimeMillis(),
-            "clicked" to true
-        )
-
-        database.push().setValue(clickData)
+        // Update the clicked field of the notification
+        database.child(notificationKey).updateChildren(updateData)
             .addOnSuccessListener {
-                Log.d("NotificationClick", "Notification click logged successfully.")
+                Log.d("Firebase", "Notification click updated successfully for key: $notificationKey")
             }
             .addOnFailureListener { e ->
-                Log.e("NotificationClick", "Failed to log click event: ${e.message}")
+                Log.e("Firebase", "Failed to update notification click: ${e.message}")
             }
     }
 }

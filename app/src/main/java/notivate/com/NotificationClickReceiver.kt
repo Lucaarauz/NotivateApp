@@ -13,34 +13,31 @@ class NotificationClickReceiver : BroadcastReceiver() {
     }
 
     override fun onReceive(context: Context, intent: Intent?) {
-        // Retrieve the notification ID and click status
-        val notificationId = intent?.getIntExtra("notification_id", -1) ?: -1
-        val clicked = intent?.getBooleanExtra("clicked", false) ?: false
+        Log.d(TAG, "onReceive triggered") // Log to check if the receiver is triggered
 
-        // Print a log message to confirm the click event was received
-        Log.d(TAG, "Notification clicked! ID: $notificationId, Clicked: $clicked")
-
-        if (notificationId != -1) {
-            // Log the click event to Firebase
-            logNotificationClickToFirebase(notificationId, clicked)
+        // Retrieve the notification ID from the intent
+        val notificationId = intent?.getStringExtra("notification_id") // Firebase UID
+        if (notificationId == null) {
+            Log.e(TAG, "Notification ID is null. Cannot track click event.")
+            return
         }
+
+        Log.d(TAG, "Notification clicked! Firebase ID: $notificationId")
+
+        // Update Firebase to mark the notification as clicked
+        logNotificationClickToFirebase(notificationId)
     }
 
-    private fun logNotificationClickToFirebase(notificationId: Int, clicked: Boolean) {
-        val database = FirebaseDatabase.getInstance().getReference("notifications")
-        val notificationClickData = mapOf(
-            "timestamp" to System.currentTimeMillis(),
-            "notification_id" to notificationId,
-            "clicked" to clicked
-        )
+    private fun logNotificationClickToFirebase(notificationId: String) {
+        val database = FirebaseDatabase.getInstance().getReference("notifications").child(notificationId)
 
-        // Push the data to Firebase
-        database.push().setValue(notificationClickData)
+        // Update the `clicked` field in the Firebase database
+        database.child("clicked").setValue(true)
             .addOnSuccessListener {
-                Log.d(TAG, "Notification click logged successfully.")
+                Log.d(TAG, "Notification click logged successfully for ID: $notificationId")
             }
             .addOnFailureListener { e ->
-                Log.e(TAG, "Failed to log notification click: ${e.message}")
+                Log.e(TAG, "Failed to log notification click for ID: $notificationId: ${e.message}")
             }
     }
 }
