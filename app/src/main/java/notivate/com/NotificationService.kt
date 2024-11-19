@@ -146,13 +146,14 @@ class NotificationService : Service() {
     }
 
     private fun startSendingNotifications() {
-        handler.post(object : Runnable {
+        handler.postDelayed(object : Runnable {
             override fun run() {
                 sendNotification()
-                handler.postDelayed(this, NOTIFICATION_INTERVAL_MS)
+                handler.postDelayed(this, NOTIFICATION_INTERVAL_MS) // Subsequent notifications
             }
-        })
+        }, NOTIFICATION_INTERVAL_MS) // Delay the first notification by the interval
     }
+
 
     override fun onDestroy() {
         super.onDestroy()
