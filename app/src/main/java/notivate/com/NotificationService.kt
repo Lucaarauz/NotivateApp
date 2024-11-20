@@ -19,58 +19,19 @@ class NotificationService : Service() {
     companion object {
         private const val CHANNEL_ID = "notification_channel"
         private const val NOTIFICATION_ID = 1
-        private const val NOTIFICATION_INTERVAL_MS = 30000L // 30 seconds
     }
 
-    //private val handler = Handler()
     private val handler = Handler(Looper.getMainLooper())
+
+    // Predefined intervals in milliseconds
+    private val notificationIntervals = listOf(15000L, 30000L, 45000L, 60000L, 120000L)
 
     private val notificationTexts = listOf(
         "Reminder: Take a break!",
         "You have been on your phone for too long today.",
         "How about a quick walk?",
         "Time to rest your eyes!",
-        "You've been on your phone for a while, take a break!",
-        "You deserve a break! Step away for a moment.",
-        "Stretch out, refresh your body!",
-        "Consider taking a few minutes for yourself.",
-        "Your phone break is long overdue, go for a walk!",
-        "Eyes tired? Time for a short pause.",
-        "Too much screen time! Time to recharge.",
-        "A quick break will do wonders for your focus!",
-        "Step outside for a few minutes, you'll feel better!",
-        "Break time! Close your eyes for a minute.",
-        "How about a quick stretch to refresh?",
-        "Your body and mind need a break. Take one now!",
-        "A little rest goes a long way. Go for it!",
-        "Take a breather – you’ll feel recharged!",
-        "Step away from the screen and take a walk!",
-        "How about a 5-minute stretch? It'll help!",
-        "Why not grab some fresh air for a while?",
-        "Time to hydrate and step away for a bit.",
-        "You’ve earned a quick break, take it now!",
-        "Your eyes will thank you for a short break.",
-        "Feel the burn in your legs, take a walk now!",
-        "You’re doing great, but a break will help you do better!",
-        "It’s been a while! Take a quick walk outside.",
-        "Take a moment to meditate. You’ve got this!",
-        "Refuel with a healthy snack or drink. Refresh yourself!",
-        "It's time to rest! Stand up and move around.",
-        "Take a 5-minute break, it will boost your energy!",
-        "Stop for a second. A break will help your productivity.",
-        "Stuck on something? Take a break, your mind will reset!",
-        "You’ve been working hard, take a moment to pause!",
-        "Staring at the screen too long? Time for a breather!",
-        "Quick 5-minute break, let’s refresh!",
-        "Feeling tired? Maybe it's time for a stretch.",
-        "How about walking to another room? It’ll help clear your mind.",
-        "Click here to track your break time and reset your focus!",
-        "Your eyes need a break – take a few minutes now.",
-        "Take a short break and hydrate. Your body will thank you!",
-        "Time for a rest – your focus will improve after a break!",
-        "Get up, stretch, and get moving! Your mind will feel fresher!",
-        "Pause and reset. Take a moment for yourself.",
-        "Staring at the screen too long? It’s time for a break!"
+        "You've been on your phone for a while, take a break!"
     )
 
     private val notificationTitles = listOf(
@@ -84,7 +45,7 @@ class NotificationService : Service() {
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
-        startSendingNotifications()    // Start sending notifications at regular intervals
+        startSendingNotifications() // Start sending notifications at random intervals
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -122,7 +83,8 @@ class NotificationService : Service() {
     }
 
     private fun buildNotification(title: String, text: String): Notification {
-        val notificationKey = logNotificationToFirebase(title, text) // Get the unique Firebase key
+        val randomInterval = getRandomIntervalFromList()
+        val notificationKey = logNotificationToFirebase(title, text, randomInterval) // Log interval too
 
         val clickIntent = Intent(this, NotificationClickActivity::class.java).apply {
             putExtra("notification_key", notificationKey) // Pass the key
@@ -149,24 +111,31 @@ class NotificationService : Service() {
         handler.postDelayed(object : Runnable {
             override fun run() {
                 sendNotification()
-                handler.postDelayed(this, NOTIFICATION_INTERVAL_MS) // Subsequent notifications
-            }
-        }, NOTIFICATION_INTERVAL_MS) // Delay the first notification by the interval
-    }
 
+                // Schedule the next notification with a random interval from the list
+                val nextInterval = getRandomIntervalFromList()
+                handler.postDelayed(this, nextInterval)
+            }
+        }, getRandomIntervalFromList()) // Delay the first notification with a random interval
+    }
 
     override fun onDestroy() {
         super.onDestroy()
         handler.removeCallbacksAndMessages(null) // Stop sending notifications when service is destroyed
     }
 
-    private fun logNotificationToFirebase(title: String, text: String): String? {
+    private fun getRandomIntervalFromList(): Long {
+        return notificationIntervals[Random.nextInt(notificationIntervals.size)]
+    }
+
+    private fun logNotificationToFirebase(title: String, text: String, interval: Long): String? {
         val database = FirebaseDatabase.getInstance().getReference("notifications")
         val notificationData = mapOf(
             "timestamp" to System.currentTimeMillis(),
             "title" to title,
             "text" to text,
-            "clicked" to false // Initially set as not clicked
+            "clicked" to false, // Initially set as not clicked
+            "interval" to interval // Log the interval in milliseconds
         )
 
         // Push the notification data and get the unique key
