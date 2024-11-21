@@ -1,4 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="notivate.com">
 
     <!-- Permissions -->
@@ -7,6 +8,8 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions" />
 
     <application
         android:icon="@mipmap/ic_launcher"
@@ -25,11 +28,6 @@
             </intent-filter>
         </activity>
 
-        <!-- NotificationClickActivity: Launched when the user clicks on the notification -->
-        <activity
-            android:name=".NotificationClickActivity"
-            android:exported="true" />
-
         <!-- Notification Service -->
         <service
             android:name=".NotificationService"
@@ -37,8 +35,9 @@
             android:exported="false"
             android:foregroundServiceType="dataSync" />
 
-        <!-- Broadcast Receiver for screen time tracking -->
-        <receiver android:name=".ScreenTimeReceiver"
+        <!-- Broadcast Receiver -->
+        <receiver
+            android:name=".ScreenTimeReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.SCREEN_ON" />

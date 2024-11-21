@@ -16,7 +16,7 @@
         android:layout_alignParentBottom="true"
         android:layout_marginEnd="98dp"
         android:layout_marginBottom="42dp"
-        android:text="Many people overuse their phones without even noticing it, this app aims to reduce the amount of time that you waste on your phone. "
+        android:text="Many people overuse their phones without even noticing it. This app aims to reduce the amount of time that you waste on your phone. "
         android:textAlignment="center"
         android:textColor="#FFFFFF"
         android:textSize="20sp" />
@@ -24,11 +24,11 @@
     <TextClock
         android:id="@+id/textClock"
         android:layout_width="200dp"
-        android:layout_height="122dp"
+        android:layout_height="100dp"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:layout_marginStart="99dp"
-        android:layout_marginTop="110dp"
+        android:layout_marginTop="100dp"
         android:textAlignment="center"
         android:textColor="#FFFFFF"
         android:textSize="40sp" />
@@ -43,6 +43,17 @@
         android:layout_marginBottom="13dp"
         android:text="Created by: Misha and Luca "
         android:textColor="#FFFFFF" />
+
+    <TextView
+        android:id="@+id/screentime_display"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="210dp"
+        android:text="Today's Screen Time: 00:00:00"
+        android:textColor="#FFFFFF"
+        android:textSize="24sp"
+        android:textStyle="bold" />
 
 
 </RelativeLayout>
